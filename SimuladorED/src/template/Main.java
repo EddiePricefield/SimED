@@ -1,10 +1,13 @@
 package template;
 
 import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
+import br.com.davidbuzatto.jsge.image.Image;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
+import java.awt.Desktop;
 import java.awt.Paint;
+import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
@@ -12,6 +15,7 @@ import java.util.Stack;
 import java.util.List;
 import java.util.Deque;
 import java.util.Queue;
+import java.util.Random;
 
 /**
  * Feito no JSGE
@@ -52,12 +56,12 @@ public class Main extends EngineFrame {
     private GuiButton btnAddTriangulo;
     private GuiButton btnDesfazer;
     private GuiButton btnRefazer;
-    
+
     //Componentes - Tela Simulação Filas
     private GuiButton btnAddNumero;
     private GuiButton btnRmvNumero;
     private int contadorValores = 0;
-    
+
     //Componentes - Tela Simulação Deque
     private GuiButton btnAddDireita;
     private GuiButton btnAddEsquerda;
@@ -71,7 +75,16 @@ public class Main extends EngineFrame {
     private int yIni = 191;
     private int xFim = 91;
     private int yFim = 91;
-    private int[] contadorBtns = new int[8];
+    private final int[] contadorBtns = new int[8];
+
+    //Componentes - Tela Simulação Lista
+    private GuiButton btnAbrirBau;
+    private GuiButton btnRemover;
+    private GuiButton btnDireita;
+    private GuiButton btnEsquerda;
+    private int posInventario;
+    private int raridade;
+    private boolean animBau;
 
     //Estruturas de Dados
     private Stack<String> pilhaDesfazer;
@@ -93,7 +106,7 @@ public class Main extends EngineFrame {
     public void create() {
 
         //Variáveis Globais
-        tela = "Inicial";
+        tela = "Lista";
         useAsDependencyForIMGUI();
 
         //Componentes Globais
@@ -129,7 +142,7 @@ public class Main extends EngineFrame {
             case "Deque" ->
                 atualizarSimulacaoDeque(delta);
             case "Lista" ->
-                atualizarSimulacaoLista();
+                atualizarSimulacaoLista(delta);
         }
 
     }
@@ -201,8 +214,8 @@ public class Main extends EngineFrame {
         }
 
     }
-    
-    public void drawOutlinedText( String text , int posX, int posY, int fontSize, Paint color , int outlineSize, Paint outlineColor){
+
+    public void drawOutlinedText(String text, int posX, int posY, int fontSize, Paint color, int outlineSize, Paint outlineColor) {
         drawText(text, posX - outlineSize, posY - outlineSize, fontSize, outlineColor);
         drawText(text, posX + outlineSize, posY - outlineSize, fontSize, outlineColor);
         drawText(text, posX - outlineSize, posY + outlineSize, fontSize, outlineColor);
@@ -227,7 +240,7 @@ public class Main extends EngineFrame {
         btnSimFila = new GuiButton(x, y + 40, 150, 30, "Simulação de Fila");
         btnSimDeque = new GuiButton(x, y + 80, 150, 30, "Simulação de Deque");
         btnSimLista = new GuiButton(x, y + 120, 150, 30, "Simulação de Lista");
-        btnLink = new GuiLabelButton(10, 455, 120, 20, "@EddiePricefield");
+        btnLink = new GuiLabelButton(670, 455, 120, 20, "@EddiePricefield");
 
         //Adicionar componentes à Lista de Componentes
         componentesTelaInicial.add(btnSimPilha);
@@ -278,6 +291,17 @@ public class Main extends EngineFrame {
             tela = "Lista";
         }
 
+        if (btnLink.isMousePressed()) {
+
+            try {
+                URI link = new URI("https://github.com/EddiePricefield");
+                Desktop.getDesktop().browse(link);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
     }
 
     /*
@@ -322,7 +346,7 @@ public class Main extends EngineFrame {
         int x = 150;
         int y = 100;
         int tamanho = 50;
-        
+
         drawText("EMPILHAR", 43, 130, 15, BLACK);
         drawText("DESEMPILHAR", 230, 400, 15, BLACK);
 
@@ -340,13 +364,9 @@ public class Main extends EngineFrame {
 
 //        drawText("Pilha: Refazer", 535, 175, 15, RED);
 //        drawRectangle(450, 190, 295, 35, BLACK);
-
         desenharPilhas();
 
         //Desenhar Painel de Informações
-        
-        
-        
         //Componentes
         if (tela.equals("Pilha") && !componentesPilha.isEmpty()) {
             for (GuiComponent c : componentesPilha) {
@@ -397,7 +417,6 @@ public class Main extends EngineFrame {
 //                pilhaDesfazer.push(pilhaRefazer.pop());
 //            }
 //        }
-
         //Atualizar o Desenho das Formas     
     }
 
@@ -488,15 +507,15 @@ public class Main extends EngineFrame {
 
         //Estrutura de Dado
         fila = new ArrayDeque<>();
-        
+
         //Variáveis iniciais para criação dos botões
         int x = 60;
         int y = 170;
-        
+
         //Criação dos Botões
         btnRmvNumero = new GuiButton(x, y, 165, 30, "Remover Valor da Fila");
         btnAddNumero = new GuiButton(x + 180, y, 165, 30, "Adicionar Valor à Fila");
-        
+
         //Adicionar Componentes à Lista de Componentes
         componentesFila.add(btnAddNumero);
         componentesFila.add(btnRmvNumero);
@@ -509,90 +528,90 @@ public class Main extends EngineFrame {
         drawText("Simulação Fila", 176, 30, 50, BLACK);
 
         //Desenhando Fila
-        for (int i = 1; i < 14; i++){
+        for (int i = 1; i < 14; i++) {
             drawRectangle(53 * i, 100, 50, 50, BLACK);
         }
-        
+
         desenharValores();
-        
+
         //Variáveis para auxiliar
         int x = 95;
         int y = 210;
-        
+
         //Desenhar os Títulos dos Botões
         drawText("DESEMPILHAR", x, y, 15, BLACK);
         drawText("EMPILHAR", x + 193, y, 15, BLACK);
-               
-        //Desenhar o Visual dos Stacks
+
+        //Desenhar o Visual da Fila
         drawText("Exibição Horizontal da Fila", x + 370, y - 40, 15, BLACK);
         drawRectangle(x + 388, y - 20, 200, 35, BLACK);
-        
+
         desenharFila();
-        
+
         //Componentes
         if (tela.equals("Fila") && !componentesFila.isEmpty()) {
             for (GuiComponent c : componentesFila) {
                 c.draw();
             }
         }
-        
+
     }
 
     public void atualizarSimulacaoFila(double delta) {
-        
+
         //Componentes
         if (tela.equals("Fila") && !componentesFila.isEmpty()) {
             for (GuiComponent c : componentesFila) {
                 c.update(delta);
             }
         }
-        
+
         //Ações - Botões do Mouse
-        if (btnAddNumero.isMousePressed()){
-            if (fila.size() < 13 && contadorValores < 100){
+        if (btnAddNumero.isMousePressed()) {
+            if (fila.size() < 13 && contadorValores < 100) {
                 fila.add(contadorValores++);
             }
         }
-        
-        if (btnRmvNumero.isMousePressed()){
-            if (!fila.isEmpty()){
+
+        if (btnRmvNumero.isMousePressed()) {
+            if (!fila.isEmpty()) {
                 fila.poll();
             }
         }
-        
+
     }
-    
-    public void desenharValores(){
-        
+
+    public void desenharValores() {
+
         int i = 0;
-        
-        for (int valor : fila){            
+
+        for (int valor : fila) {
 
             int y = 118;
             int x = 63;
-            
-            if (i == 0 && fila.size() == 1){
+
+            if (i == 0 && fila.size() == 1) {
                 drawOutlinedText(String.format("%02d", valor), (53 * i + x), y, 25, PURPLE, 1, BLACK);
-            } else if (i == 0){
+            } else if (i == 0) {
                 drawOutlinedText(String.format("%02d", valor), (53 * i + x), y, 25, RED, 1, BLACK);
-            } else if (i == fila.size() - 1){
+            } else if (i == fila.size() - 1) {
                 drawOutlinedText(String.format("%02d", valor), (53 * i + x), y, 25, BLUE, 1, BLACK);
-            } else{
+            } else {
                 drawOutlinedText(String.format("%02d", valor), (53 * i + x), y, 25, PINK, 1, BLACK);
             }
-            
+
             i++;
         }
-        
+
     }
-    
+
     public void desenharFila() {
 
         int largura = 10;
         int altura = 15;
 
         Paint cor;
- 
+
         //Pilha Desfazer
         for (int i = 0; i < fila.size(); i++) {
             int x = 510 + (largura + 1) * i;
@@ -618,30 +637,30 @@ public class Main extends EngineFrame {
     *     TELA DE SIMULAÇÃO DE DEQUE
      */
     public void criarSimulacaoDeque() {
-        
+
         //Lista de Componentes
         componentesDeque = new ArrayList<>();
 
         //Estrutura de Dado
         dequeED = new ArrayDeque<>();
         dequeCB = new ArrayDeque<>();
-        
+
         //Valores iniciais para organizar os botões
         int x = 400;
         int distBtns = 100;
         int y = 190;
-        
+
         //Criação dos Botões
         btnAddDireita = new GuiButton(x, y, 20, 15, "→");
         btnAddEsquerda = new GuiButton(x - 50, y, 20, 15, "←");
         btnAddCima = new GuiButton(x - 25, y - 20, 20, 15, "↑");
         btnAddBaixo = new GuiButton(x - 25, y + 20, 20, 15, "↓");
-        
+
         btnRmvDireita = new GuiButton(x, y + distBtns, 20, 15, "←");
         btnRmvEsquerda = new GuiButton(x - 50, y + distBtns, 20, 15, "→");
         btnRmvCima = new GuiButton(x - 25, y - 20 + distBtns, 20, 15, "↓");
         btnRmvBaixo = new GuiButton(x - 25, y + 20 + distBtns, 20, 15, "↑");
-        
+
         //Adicionar Componentes à Lista de Componentes
         componentesDeque.add(btnAddDireita);
         componentesDeque.add(btnAddEsquerda);
@@ -651,53 +670,53 @@ public class Main extends EngineFrame {
         componentesDeque.add(btnRmvEsquerda);
         componentesDeque.add(btnRmvCima);
         componentesDeque.add(btnRmvBaixo);
-        
+
     }
 
     public void desenharSimulacaoDeque() {
-        
+
         //Título
         drawText("Simulação Deque", 176, 30, 50, BLACK);
-        
+
         //Desenhar Grid e Quadrado
         drawRectangle(50, 100, 273, 273, BLACK);
-        
+
         drawRectangle(141, 191, 91, 91, GRAY);
         drawRectangle(xIni, yIni, xFim, yFim, PINK);
-        
+
         //Variaveis Auxiliares
         int x = 350;
         int y = 150;
-        
-        //Desenhar o Visual dos Stacks
+
+        //Desenhar o Visual dos Deques
         drawText("Exibição Horizontal dos Deques", x + 140, y - 30, 15, BLACK);
         drawRectangle(x + 125, y - 10, 295, 35, BLACK);
         drawRectangle(x + 125, y + 40, 295, 35, BLACK);
-        
+
         desenharDeque();
-        
+
         //Desenhar os Títulos dos Botões
         drawText("EMPILHAR", x, y, 15, BLACK);
         drawText("DESEMPILHAR", x - 14, y + 100, 15, BLACK);
-        
+
         //Componentes
         if (tela.equals("Deque") && !componentesDeque.isEmpty()) {
             for (GuiComponent c : componentesDeque) {
                 c.draw();
             }
         }
-        
+
     }
 
     public void atualizarSimulacaoDeque(double delta) {
-        
+
         //Componentes
         if (tela.equals("Deque") && !componentesDeque.isEmpty()) {
             for (GuiComponent c : componentesDeque) {
                 c.update(delta);
             }
         }
-        
+
         //Ação - Botões
         if (btnAddDireita.isMousePressed() && contadorBtns[0] < 13) {
             xFim += 7;
@@ -775,16 +794,15 @@ public class Main extends EngineFrame {
             }
         }
 
-        
     }
-    
-    public void desenharDeque(){
-        
+
+    public void desenharDeque() {
+
         int largura = 10;
         int altura = 15;
 
         Paint cor;
-        
+
         int i = 0, j = 0;
         for (String valor : dequeED) {
             int x = 480 + (largura + 1) * i;
@@ -800,7 +818,7 @@ public class Main extends EngineFrame {
             fillRectangle(x, y, largura, altura, cor);
             i++;
         }
-        
+
         for (String valor : dequeCB) {
             int x = 480 + (largura + 1) * j;
             int y = 150;
@@ -815,23 +833,257 @@ public class Main extends EngineFrame {
             fillRectangle(x, y, largura, altura, cor);
             j++;
         }
-        
+
     }
 
     /*
     *     TELA DE SIMULAÇÃO DE LISTA
      */
     public void criarSimulacaoLista() {
+
+        //Lista de Componentes
+        componentesLista = new ArrayList<>();
+
+        //Estrutura de Dado
+        lista = new ArrayList<>(16);
+
+        for (int i = 0; i < 16; i++) {
+            lista.add(0);
+        }
+
+        //Variáveis para ajudar na organização
+        int x = 355;
+        int y = 370;
+
+        //Criação dos Botões
+        btnEsquerda = new GuiButton(x, y, 20, 30, "←");
+        btnRemover = new GuiButton(x + 25, y, 70, 30, "Remover");
+        btnDireita = new GuiButton(x + 100, y, 20, 30, "→");
+
+        btnAbrirBau = new GuiButton(x + 285, y - 90, 70, 30, "Abrir");
+
+        componentesLista.add(btnEsquerda);
+        componentesLista.add(btnRemover);
+        componentesLista.add(btnDireita);
+        componentesLista.add(btnAbrirBau);
+
     }
 
     public void desenharSimulacaoLista() {
+
+        //Título
+        drawText("Simulação Lista", 176, 30, 50, BLACK);
+
+        //Desenhar Janelas Principais
+        int x = 285;
+        int y = 100;
+        int tamanho = 65;
+
+        //Inventário - GRID
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                drawRectangle(x + tamanho * j, y + tamanho * i, tamanho, tamanho, BLACK);
+            }
+        }
+
+        //Inventário - Selecionar item
+        drawRectangle(x + tamanho * (posInventario % 4), y + tamanho * (posInventario / 4), tamanho, tamanho, PINK);
+        drawRectangle(x - 1 + tamanho * (posInventario % 4), y - 1 + tamanho * (posInventario / 4), tamanho + 2, tamanho + 2, PINK);
+
+        //Inventário - Desenhar os itens
+        for (int i = 0; i < lista.size(); i++) {
+
+            int valor = lista.get(i);
+            int xC = x + 5 + (tamanho) * (i % 4) + (tamanho - 10) / 2;
+            int yC = y + 5 + (tamanho) * (i / 4) + (tamanho - 10) / 2;
+            int raio = (tamanho - 10) / 2;
+
+            switch (valor) {
+                case 1 -> {
+                    fillCircle(xC, yC, raio, GREEN);
+                    drawCircle(xC, yC, raio, BLACK);
+                }
+                case 2 -> {
+                    fillCircle(xC, yC, raio, BLUE);
+                    drawCircle(xC, yC, raio, BLACK);
+                }
+                case 3 -> {
+                    fillCircle(xC, yC, raio, PURPLE);
+                    drawCircle(xC, yC, raio, BLACK);
+                }
+                case 4 -> {
+                    fillCircle(xC, yC, raio, YELLOW);
+                    drawCircle(xC, yC, raio, BLACK);
+                }
+                default -> {
+                }
+            }
+
+        }
+
+        //Baú
+        drawRectangle(x + 290, y + 20, 200, 200, BLACK);
+        drawRectangle(x + 300, y + 30, 180, 140, BLACK);
+        
+        animacaoBau();
+        
+        //Desenhar o Visual da Lista
+        drawText("Exibição Horizontal da Lista", x - 270, y+ 20, 15, BLACK);
+        drawRectangle(x - 265, y + 40, 240, 35, BLACK);
+
+        desenharLista();
+
+        //Desenhar os Títulos dos Botões
+        drawText("EMPILHAR", x + 356, y + 230, 15, BLACK);
+        drawText("DESEMPILHAR", x + 80, y + 310, 15, BLACK);
+
+        //Componentes
+        if (tela.equals("Lista") && !componentesLista.isEmpty()) {
+            for (GuiComponent c : componentesLista) {
+                c.draw();
+            }
+        }
+
     }
 
-    public void atualizarSimulacaoLista() {
+    public void atualizarSimulacaoLista(double delta) {
+
+        //Componentes
+        if (tela.equals("Lista") && !componentesLista.isEmpty()) {
+            for (GuiComponent c : componentesLista) {
+                c.update(delta);
+            }
+        }
+
+        //Ação - Botões
+        if (btnDireita.isMousePressed()) {
+
+            if (posInventario < 15) {
+                posInventario++;
+            } else {
+                posInventario = 0;
+            }
+
+        }
+
+        if (btnEsquerda.isMousePressed()) {
+
+            if (posInventario > 0) {
+                posInventario--;
+            } else {
+                posInventario = 15;
+            }
+
+        }
+
+        if (btnRemover.isMousePressed() && !lista.isEmpty()) {
+            lista.set(posInventario, 0);
+        }
+
+        if (btnAbrirBau.isMousePressed()) {
+            
+            animBau = true;
+
+            Random random = new Random();
+            int probabilidade = random.nextInt(100);
+
+            if (probabilidade < 50) {
+                
+                raridade = 1;
+                inserirItem(1);
+
+            } else if (probabilidade < 80) {
+                
+                raridade = 2;
+                inserirItem(2);
+
+            } else if (probabilidade < 95) {
+                
+                raridade = 3;
+                inserirItem(3);
+
+            } else {
+                
+                raridade = 4;
+                inserirItem(4);
+
+            }
+
+        }
+
+    }
+
+    public void animacaoBau() {
+        
+        
+        Image bauFechado = loadImage("resources/images/bauFechado.png");
+        Image bauAberto = loadImage("resources/images/bauAberto.png");
+        Image bauAnim = loadImage("resources/images/bauAnim.gif");
+        
+        if (!animBau){
+            
+            drawImage(bauFechado, 586, 131);
+            
+        } else{
+            
+            drawImage(bauAberto, 586, 131);
+            
+        }
+        
+    }
+    
+    public void desenharLista(){
+        
+        int largura = 10;
+        int altura = 15;
+
+        Paint cor;
+
+        int i = 0;
+        
+        for (Integer valor : lista) {
+            int x = 55 + (largura + 1) * i;
+            int y = 150;
+            
+            //Mudar cores com base na raridade
+            switch (valor) {
+                case 1 -> {
+                    cor = DARKGREEN;
+                    fillRectangle(x, y, largura, altura, cor);
+                }
+                case 2 -> {
+                    cor = DARKBLUE;
+                    fillRectangle(x, y, largura, altura, cor);
+                }
+                case 3 -> {
+                    cor = DARKPURPLE;
+                    fillRectangle(x, y, largura, altura, cor);
+                }
+                case 4 -> {
+                    cor = GOLD;
+                    fillRectangle(x, y, largura, altura, cor);
+                }
+                default -> {
+                    i--;
+                }
+            }
+            
+            i++;
+        }
+        
+    }
+
+    private void inserirItem(int numero) {
+        for (int i = 0; i < lista.size(); i++) {
+            if (lista.get(i) == 0) {
+                lista.set(i, numero);
+                break;
+            }
+        }
     }
 
     /*
-    *     TELA DE SIMULAÇÃO DE LISTA
+    *     EXTRAS
      */
 //----------< Instanciar Engine e Iniciá-la >----------//
     public static void main(String[] args) {
