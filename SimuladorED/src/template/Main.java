@@ -57,12 +57,28 @@ public class Main extends EngineFrame {
     private GuiButton btnAddNumero;
     private GuiButton btnRmvNumero;
     private int contadorValores = 0;
+    
+    //Componentes - Tela Simulação Deque
+    private GuiButton btnAddDireita;
+    private GuiButton btnAddEsquerda;
+    private GuiButton btnAddCima;
+    private GuiButton btnAddBaixo;
+    private GuiButton btnRmvDireita;
+    private GuiButton btnRmvEsquerda;
+    private GuiButton btnRmvCima;
+    private GuiButton btnRmvBaixo;
+    private int xIni = 141;
+    private int yIni = 191;
+    private int xFim = 91;
+    private int yFim = 91;
+    private int[] contadorBtns = new int[8];
 
     //Estruturas de Dados
     private Stack<String> pilhaDesfazer;
     private Stack<String> pilhaRefazer;
     private Queue<Integer> fila;
-    private Deque<Integer> deque;
+    private Deque<String> dequeED;
+    private Deque<String> dequeCB;
     private List<Integer> lista;
 
     //Construtor
@@ -77,7 +93,7 @@ public class Main extends EngineFrame {
     public void create() {
 
         //Variáveis Globais
-        tela = "Fila";
+        tela = "Inicial";
         useAsDependencyForIMGUI();
 
         //Componentes Globais
@@ -111,7 +127,7 @@ public class Main extends EngineFrame {
             case "Fila" ->
                 atualizarSimulacaoFila(delta);
             case "Deque" ->
-                atualizarSimulacaoDeque();
+                atualizarSimulacaoDeque(delta);
             case "Lista" ->
                 atualizarSimulacaoLista();
         }
@@ -576,7 +592,7 @@ public class Main extends EngineFrame {
         int altura = 15;
 
         Paint cor;
-
+ 
         //Pilha Desfazer
         for (int i = 0; i < fila.size(); i++) {
             int x = 510 + (largura + 1) * i;
@@ -602,12 +618,204 @@ public class Main extends EngineFrame {
     *     TELA DE SIMULAÇÃO DE DEQUE
      */
     public void criarSimulacaoDeque() {
+        
+        //Lista de Componentes
+        componentesDeque = new ArrayList<>();
+
+        //Estrutura de Dado
+        dequeED = new ArrayDeque<>();
+        dequeCB = new ArrayDeque<>();
+        
+        //Valores iniciais para organizar os botões
+        int x = 400;
+        int distBtns = 100;
+        int y = 190;
+        
+        //Criação dos Botões
+        btnAddDireita = new GuiButton(x, y, 20, 15, "→");
+        btnAddEsquerda = new GuiButton(x - 50, y, 20, 15, "←");
+        btnAddCima = new GuiButton(x - 25, y - 20, 20, 15, "↑");
+        btnAddBaixo = new GuiButton(x - 25, y + 20, 20, 15, "↓");
+        
+        btnRmvDireita = new GuiButton(x, y + distBtns, 20, 15, "←");
+        btnRmvEsquerda = new GuiButton(x - 50, y + distBtns, 20, 15, "→");
+        btnRmvCima = new GuiButton(x - 25, y - 20 + distBtns, 20, 15, "↓");
+        btnRmvBaixo = new GuiButton(x - 25, y + 20 + distBtns, 20, 15, "↑");
+        
+        //Adicionar Componentes à Lista de Componentes
+        componentesDeque.add(btnAddDireita);
+        componentesDeque.add(btnAddEsquerda);
+        componentesDeque.add(btnAddCima);
+        componentesDeque.add(btnAddBaixo);
+        componentesDeque.add(btnRmvDireita);
+        componentesDeque.add(btnRmvEsquerda);
+        componentesDeque.add(btnRmvCima);
+        componentesDeque.add(btnRmvBaixo);
+        
     }
 
     public void desenharSimulacaoDeque() {
+        
+        //Título
+        drawText("Simulação Deque", 176, 30, 50, BLACK);
+        
+        //Desenhar Grid e Quadrado
+        drawRectangle(50, 100, 273, 273, BLACK);
+        
+        drawRectangle(141, 191, 91, 91, GRAY);
+        drawRectangle(xIni, yIni, xFim, yFim, PINK);
+        
+        //Variaveis Auxiliares
+        int x = 350;
+        int y = 150;
+        
+        //Desenhar o Visual dos Stacks
+        drawText("Exibição Horizontal dos Deques", x + 140, y - 30, 15, BLACK);
+        drawRectangle(x + 125, y - 10, 295, 35, BLACK);
+        drawRectangle(x + 125, y + 40, 295, 35, BLACK);
+        
+        desenharDeque();
+        
+        //Desenhar os Títulos dos Botões
+        drawText("EMPILHAR", x, y, 15, BLACK);
+        drawText("DESEMPILHAR", x - 14, y + 100, 15, BLACK);
+        
+        //Componentes
+        if (tela.equals("Deque") && !componentesDeque.isEmpty()) {
+            for (GuiComponent c : componentesDeque) {
+                c.draw();
+            }
+        }
+        
     }
 
-    public void atualizarSimulacaoDeque() {
+    public void atualizarSimulacaoDeque(double delta) {
+        
+        //Componentes
+        if (tela.equals("Deque") && !componentesDeque.isEmpty()) {
+            for (GuiComponent c : componentesDeque) {
+                c.update(delta);
+            }
+        }
+        
+        //Ação - Botões
+        if (btnAddDireita.isMousePressed() && contadorBtns[0] < 13) {
+            xFim += 7;
+            contadorBtns[0]++;
+            dequeED.addLast("Direita");
+            if (contadorBtns[4] > 0) {
+                contadorBtns[4]--;
+            }
+        }
+
+        if (btnAddEsquerda.isMousePressed() && contadorBtns[1] < 13) {
+            xIni -= 7;
+            xFim += 7;
+            contadorBtns[1]++;
+            dequeED.addFirst("Esquerda");
+            if (contadorBtns[5] > 0) {
+                contadorBtns[5]--;
+            }
+        }
+
+        if (btnAddCima.isMousePressed() && contadorBtns[2] < 13) {
+            yIni -= 7;
+            yFim += 7;
+            contadorBtns[2]++;
+            dequeCB.addLast("Cima");
+            if (contadorBtns[6] > 0) {
+                contadorBtns[6]--;
+            }
+        }
+
+        if (btnAddBaixo.isMousePressed() && contadorBtns[3] < 13) {
+            yFim += 7;
+            contadorBtns[3]++;
+            dequeCB.addFirst("Baixo");
+            if (contadorBtns[7] > 0) {
+                contadorBtns[7]--;
+            }
+        }
+
+        if (btnRmvDireita.isMousePressed() && contadorBtns[0] > 0) {
+            xFim -= 7;
+            contadorBtns[0]--;
+            dequeED.pollLast();
+            if (contadorBtns[4] < 13) {
+                contadorBtns[4]++;
+            }
+        }
+
+        if (btnRmvEsquerda.isMousePressed() && contadorBtns[1] > 0) {
+            xIni += 7;
+            xFim -= 7;
+            contadorBtns[1]--;
+            dequeED.pollFirst();
+            if (contadorBtns[5] < 13) {
+                contadorBtns[5]++;
+            }
+        }
+
+        if (btnRmvCima.isMousePressed() && contadorBtns[2] > 0) {
+            yIni += 7;
+            yFim -= 7;
+            contadorBtns[2]--;
+            dequeCB.pollLast();
+            if (contadorBtns[6] < 13) {
+                contadorBtns[6]++;
+            }
+        }
+
+        if (btnRmvBaixo.isMousePressed() && contadorBtns[3] > 0) {
+            yFim -= 7;
+            contadorBtns[3]--;
+            dequeCB.pollFirst();
+            if (contadorBtns[7] < 13) {
+                contadorBtns[7]++;
+            }
+        }
+
+        
+    }
+    
+    public void desenharDeque(){
+        
+        int largura = 10;
+        int altura = 15;
+
+        Paint cor;
+        
+        int i = 0, j = 0;
+        for (String valor : dequeED) {
+            int x = 480 + (largura + 1) * i;
+            int y = 200;
+
+            //Mudar a cor do Topo e da Cauda
+            if (valor.equals("Direita")) {
+                cor = DARKGREEN;
+            } else {
+                cor = GREEN;
+            }
+
+            fillRectangle(x, y, largura, altura, cor);
+            i++;
+        }
+        
+        for (String valor : dequeCB) {
+            int x = 480 + (largura + 1) * j;
+            int y = 150;
+
+            //Mudar a cor do Topo e da Cauda
+            if (valor.equals("Cima")) {
+                cor = DARKPURPLE;
+            } else {
+                cor = PURPLE;
+            }
+
+            fillRectangle(x, y, largura, altura, cor);
+            j++;
+        }
+        
     }
 
     /*
