@@ -1,10 +1,13 @@
 package template;
 
+import br.com.davidbuzatto.jsge.animation.frame.FrameByFrameAnimation;
+import br.com.davidbuzatto.jsge.animation.frame.ImageAnimationFrame;
 import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
 import br.com.davidbuzatto.jsge.image.Image;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
+import br.com.davidbuzatto.jsge.sound.Sound;
 import java.awt.Desktop;
 import java.awt.Paint;
 import java.net.URI;
@@ -30,6 +33,7 @@ public class Main extends EngineFrame {
     //Variáveis Globais
     private double cronometro;
     private String tela;
+    private boolean cronometrar;
 
     //Listas de Componentes
     private List<GuiComponent> componentesGlobais;
@@ -85,6 +89,11 @@ public class Main extends EngineFrame {
     private int posInventario;
     private int raridade;
     private boolean animBau;
+    private FrameByFrameAnimation<ImageAnimationFrame> bauAnim;
+    private GuiLabelButton btnLinkBau;
+    private Sound bruh;
+    private Sound woah;
+    private Sound bttb;
 
     //Estruturas de Dados
     private Stack<String> pilhaDesfazer;
@@ -126,7 +135,30 @@ public class Main extends EngineFrame {
     public void update(double delta) {
 
         //Variáveis Globais
-        cronometro += delta;
+        if (cronometrar) {
+            
+            cronometro += getFrameTime();
+            
+            if (cronometro > 0.7 && cronometro < 0.73 && raridade == 4){
+                woah.play();
+            }
+            
+            //Som para itens não raros
+            if (cronometro > 1.40 && cronometro < 1.43 && raridade != 4 && raridade != 3){
+               bruh.play(); 
+            }
+            
+            //Esperar a animação do baú acabar antes de inserir o item / ativar o botão novamente
+            if (cronometro >= 2){
+                
+                if (raridade == 3){
+                    bttb.play();
+                }
+                
+                inserirItem(raridade);
+                cronometrar = false;
+            }
+        }
 
         //Atualização - Globais
         componentesGlobais("Atualizar", delta);
@@ -288,6 +320,7 @@ public class Main extends EngineFrame {
         }
 
         if (btnSimLista.isMousePressed()) {
+            animBau = false;
             tela = "Lista";
         }
 
@@ -861,11 +894,15 @@ public class Main extends EngineFrame {
         btnDireita = new GuiButton(x + 100, y, 20, 30, "→");
 
         btnAbrirBau = new GuiButton(x + 285, y - 90, 70, 30, "Abrir");
+        btnLinkBau = new GuiLabelButton(x + 370, y - 125, 35, 20, "@Digs");
+
+        criarAnimacoes();
 
         componentesLista.add(btnEsquerda);
         componentesLista.add(btnRemover);
         componentesLista.add(btnDireita);
         componentesLista.add(btnAbrirBau);
+        componentesLista.add(btnLinkBau);
 
     }
 
@@ -924,11 +961,11 @@ public class Main extends EngineFrame {
         //Baú
         drawRectangle(x + 290, y + 20, 200, 200, BLACK);
         drawRectangle(x + 300, y + 30, 180, 140, BLACK);
-        
+
         animacaoBau();
-        
+
         //Desenhar o Visual da Lista
-        drawText("Exibição Horizontal da Lista", x - 270, y+ 20, 15, BLACK);
+        drawText("Exibição Horizontal da Lista", x - 270, y + 20, 15, BLACK);
         drawRectangle(x - 265, y + 40, 240, 35, BLACK);
 
         desenharLista();
@@ -955,6 +992,9 @@ public class Main extends EngineFrame {
             }
         }
 
+        //Animação do Baú
+        bauAnim.update(delta);
+
         //Ação - Botões
         if (btnDireita.isMousePressed()) {
 
@@ -980,71 +1020,103 @@ public class Main extends EngineFrame {
             lista.set(posInventario, 0);
         }
 
+        if (btnLinkBau.isMousePressed()) {
+
+            try {
+                URI link = new URI("https://www.patreon.com/posts/23883775");
+                Desktop.getDesktop().browse(link);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        
+        //Fazer só poder abrir um baú quando a animação acabar
+        btnAbrirBau.setEnabled(!cronometrar);
+
         if (btnAbrirBau.isMousePressed()) {
             
-            animBau = true;
+            for (int valor : lista){
+                if (valor == 0){
+                    cronometro = 0;
+                    animBau = true;
+                    bauAnim.reset();
+                    break;
+                }
+            }
 
             Random random = new Random();
             int probabilidade = random.nextInt(100);
+            
+            bruh = loadSound("resources/sfx/bruh.ogg");
+            woah = loadSound("resources/sfx/woah.ogg");
+            bttb = loadSound("resources/sfx/bad-to-the-bone.ogg");
 
             if (probabilidade < 50) {
-                
+                cronometrar = true;
                 raridade = 1;
-                inserirItem(1);
-
             } else if (probabilidade < 80) {
-                
+                cronometrar = true;
                 raridade = 2;
-                inserirItem(2);
-
             } else if (probabilidade < 95) {
-                
+                cronometrar = true;
                 raridade = 3;
-                inserirItem(3);
-
             } else {
-                
+                cronometrar = true;
                 raridade = 4;
-                inserirItem(4);
+            }
 
+        }
+        
+
+    }
+
+    public void criarAnimacoes() {
+
+        List<ImageAnimationFrame> imageFrames = new ArrayList<>();
+        for (int i = 0; i < 32; i++) {
+            String c = String.valueOf(i);
+            imageFrames.add(new ImageAnimationFrame(loadImage("resources/images/bauFrames/bauAnim-" + c + ".png")));
+        }
+
+        bauAnim = new FrameByFrameAnimation<>(0.05, imageFrames);
+
+    }
+
+    public void animacaoBau() {
+
+        Image bauFechado = loadImage("resources/images/bauFechado.png");
+        Image bauAberto = loadImage("resources/images/bauAberto.png");
+
+        if (!animBau) {
+
+            drawImage(bauFechado, 586, 131);
+
+        } else {
+
+            if (cronometro <= 2) {
+                drawImage(bauAnim.getCurrentFrame().baseImage, 586, 131);
+            } else {
+                drawImage(bauAberto, 586, 131);
             }
 
         }
 
     }
 
-    public void animacaoBau() {
-        
-        
-        Image bauFechado = loadImage("resources/images/bauFechado.png");
-        Image bauAberto = loadImage("resources/images/bauAberto.png");
-        Image bauAnim = loadImage("resources/images/bauAnim.gif");
-        
-        if (!animBau){
-            
-            drawImage(bauFechado, 586, 131);
-            
-        } else{
-            
-            drawImage(bauAberto, 586, 131);
-            
-        }
-        
-    }
-    
-    public void desenharLista(){
-        
+    public void desenharLista() {
+
         int largura = 10;
         int altura = 15;
 
         Paint cor;
 
         int i = 0;
-        
+
         for (Integer valor : lista) {
             int x = 55 + (largura + 1) * i;
             int y = 150;
-            
+
             //Mudar cores com base na raridade
             switch (valor) {
                 case 1 -> {
@@ -1067,10 +1139,10 @@ public class Main extends EngineFrame {
                     i--;
                 }
             }
-            
+
             i++;
         }
-        
+
     }
 
     private void inserirItem(int numero) {
