@@ -5,6 +5,7 @@ import br.com.davidbuzatto.jsge.animation.frame.ImageAnimationFrame;
 import br.com.davidbuzatto.jsge.core.engine.EngineFrame;
 import br.com.davidbuzatto.jsge.image.Image;
 import br.com.davidbuzatto.jsge.imgui.GuiButton;
+import br.com.davidbuzatto.jsge.imgui.GuiCheckBox;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
 import br.com.davidbuzatto.jsge.sound.Sound;
@@ -65,6 +66,7 @@ public class Main extends EngineFrame {
     private GuiButton btnAddNumero;
     private GuiButton btnRmvNumero;
     private int contadorValores = 0;
+    private int indexFilaCircular = 0;
 
     //Componentes - Tela Simulação Deque
     private GuiButton btnAddDireita;
@@ -89,6 +91,7 @@ public class Main extends EngineFrame {
     private int posInventario;
     private int raridade;
     private boolean animBau;
+    private GuiCheckBox checkAnimBau;
     private FrameByFrameAnimation<ImageAnimationFrame> bauAnim;
     private GuiLabelButton btnLinkBau;
     private Sound bruh;
@@ -115,7 +118,7 @@ public class Main extends EngineFrame {
     public void create() {
 
         //Variáveis Globais
-        tela = "Lista";
+        tela = "Fila";
         useAsDependencyForIMGUI();
 
         //Componentes Globais
@@ -136,25 +139,25 @@ public class Main extends EngineFrame {
 
         //Variáveis Globais
         if (cronometrar) {
-            
-            cronometro += getFrameTime();
-            
-            if (cronometro > 0.7 && cronometro < 0.73 && raridade == 4){
+
+            cronometro += delta;
+
+            if (cronometro > 0.7 && cronometro < 0.73 && raridade == 4) {
                 woah.play();
             }
-            
+
             //Som para itens não raros
-            if (cronometro > 1.40 && cronometro < 1.43 && raridade != 4 && raridade != 3){
-               bruh.play(); 
+            if (cronometro > 1.40 && cronometro < 1.43 && raridade != 4 && raridade != 3) {
+                bruh.play();
             }
-            
+
             //Esperar a animação do baú acabar antes de inserir o item / ativar o botão novamente
-            if (cronometro >= 2){
-                
-                if (raridade == 3){
+            if (cronometro >= 2) {
+
+                if (raridade == 3) {
                     bttb.play();
                 }
-                
+
                 inserirItem(raridade);
                 cronometrar = false;
             }
@@ -566,6 +569,17 @@ public class Main extends EngineFrame {
         }
 
         desenharValores();
+        
+        //Desenhando Fila Circular
+        double centroX = 220, centroY = 330, raio = 100;
+
+        for (int i = 0; i < 13; i++) {
+            double x = centroX + raio * Math.cos(Math.toRadians(i * 360/13));
+            double y = centroY + raio * Math.sin(Math.toRadians(i * 360/13));
+            drawRectangle(x, y, 30, 30, BLACK);
+        }
+        
+        desenharValoresCirculares();
 
         //Variáveis para auxiliar
         int x = 95;
@@ -574,6 +588,8 @@ public class Main extends EngineFrame {
         //Desenhar os Títulos dos Botões
         drawText("DESEMPILHAR", x, y, 15, BLACK);
         drawText("EMPILHAR", x + 193, y, 15, BLACK);
+        drawText("FILA", x + 115, y + 110, 20, BLACK);
+        drawText("CIRCULAR", x + 90, y + 130, 20, BLACK);
 
         //Desenhar o Visual da Fila
         drawText("Exibição Horizontal da Fila", x + 370, y - 40, 15, BLACK);
@@ -608,6 +624,9 @@ public class Main extends EngineFrame {
 
         if (btnRmvNumero.isMousePressed()) {
             if (!fila.isEmpty()) {
+                if (fila.size() != 1){
+                    indexFilaCircular = (indexFilaCircular + 1) % 13;
+                }
                 fila.poll();
             }
         }
@@ -617,12 +636,11 @@ public class Main extends EngineFrame {
     public void desenharValores() {
 
         int i = 0;
+        
+        int y = 118;
+        int x = 63;
 
         for (int valor : fila) {
-
-            int y = 118;
-            int x = 63;
-
             if (i == 0 && fila.size() == 1) {
                 drawOutlinedText(String.format("%02d", valor), (53 * i + x), y, 25, PURPLE, 1, BLACK);
             } else if (i == 0) {
@@ -636,6 +654,36 @@ public class Main extends EngineFrame {
             i++;
         }
 
+    }
+    
+    public void desenharValoresCirculares(){
+        
+        double centroX = 220;
+        double centroY = 330;
+        double raio = 100;
+        double lado = 30;
+        
+        for (int i = 0; i < fila.size(); i++) {
+            double angulo = Math.toRadians(((indexFilaCircular + i) % 13) * 360 / 13);
+            double x = centroX + raio * Math.cos(angulo);
+            double y = centroY + raio * Math.sin(angulo);
+            
+            if (fila.size() == 1){
+                fillRectangle(x, y, lado, lado, PURPLE);
+                drawRectangle(x, y, lado, lado, BLACK);
+            } else if (i == 0){
+                fillRectangle(x, y, lado, lado, RED);
+                drawRectangle(x, y, lado, lado, BLACK);
+            } else if (i == fila.size() - 1){
+                fillRectangle(x, y, lado, lado, BLUE);
+                drawRectangle(x, y, lado, lado, BLACK);
+            } else{
+                fillRectangle(x, y, lado, lado, PINK);
+                drawRectangle(x, y, lado, lado, BLACK);
+            }
+            
+        }
+        
     }
 
     public void desenharFila() {
@@ -895,7 +943,9 @@ public class Main extends EngineFrame {
 
         btnAbrirBau = new GuiButton(x + 285, y - 90, 70, 30, "Abrir");
         btnLinkBau = new GuiLabelButton(x + 370, y - 125, 35, 20, "@Digs");
-
+        checkAnimBau = new GuiCheckBox(x + 235, y - 125, 35, 20, "Animação");
+        checkAnimBau.setSelected(true);
+        
         criarAnimacoes();
 
         componentesLista.add(btnEsquerda);
@@ -903,6 +953,7 @@ public class Main extends EngineFrame {
         componentesLista.add(btnDireita);
         componentesLista.add(btnAbrirBau);
         componentesLista.add(btnLinkBau);
+        componentesLista.add(checkAnimBau);
 
     }
 
@@ -1018,6 +1069,18 @@ public class Main extends EngineFrame {
 
         if (btnRemover.isMousePressed() && !lista.isEmpty()) {
             lista.set(posInventario, 0);
+
+            for (int i = 0; i < 16; i++) {
+                if (lista.get(i) != 0) {
+                    posInventario = i;
+                    break;
+                }
+            }
+
+        }
+        
+        if (checkAnimBau.isMousePressed()){
+            animBau = false;
         }
 
         if (btnLinkBau.isMousePressed()) {
@@ -1030,44 +1093,52 @@ public class Main extends EngineFrame {
             }
 
         }
-        
+
         //Fazer só poder abrir um baú quando a animação acabar
         btnAbrirBau.setEnabled(!cronometrar);
 
         if (btnAbrirBau.isMousePressed()) {
             
-            for (int valor : lista){
-                if (valor == 0){
-                    cronometro = 0;
-                    animBau = true;
-                    bauAnim.reset();
-                    break;
+            if (checkAnimBau.isSelected()){
+                
+                for (int valor : lista) {
+                    if (valor == 0) {
+                        cronometro = 0;
+                        animBau = true;
+                        bauAnim.reset();
+                        break;
+                    }
                 }
+                
             }
+            
 
             Random random = new Random();
             int probabilidade = random.nextInt(100);
-            
+
             bruh = loadSound("resources/sfx/bruh.ogg");
             woah = loadSound("resources/sfx/woah.ogg");
             bttb = loadSound("resources/sfx/bad-to-the-bone.ogg");
 
             if (probabilidade < 50) {
-                cronometrar = true;
+                cronometrar = checkAnimBau.isSelected();
                 raridade = 1;
             } else if (probabilidade < 80) {
-                cronometrar = true;
+                cronometrar = checkAnimBau.isSelected();
                 raridade = 2;
             } else if (probabilidade < 95) {
-                cronometrar = true;
+                cronometrar = checkAnimBau.isSelected();
                 raridade = 3;
             } else {
-                cronometrar = true;
+                cronometrar = checkAnimBau.isSelected();
                 raridade = 4;
+            }
+            
+            if (!checkAnimBau.isSelected()){
+                inserirItem(raridade);
             }
 
         }
-        
 
     }
 
