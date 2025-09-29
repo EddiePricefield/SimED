@@ -92,6 +92,7 @@ public class Main extends EngineFrame {
     private int raridade;
     private boolean animBau;
     private GuiCheckBox checkAnimBau;
+    private GuiCheckBox checkRmvDinamico;
     private FrameByFrameAnimation<ImageAnimationFrame> bauAnim;
     private GuiLabelButton btnLinkBau;
     private Sound bruh;
@@ -118,7 +119,7 @@ public class Main extends EngineFrame {
     public void create() {
 
         //Variáveis Globais
-        tela = "Fila";
+        tela = "Lista";
         useAsDependencyForIMGUI();
 
         //Componentes Globais
@@ -245,6 +246,36 @@ public class Main extends EngineFrame {
         }
 
         if (btnVoltar.isMousePressed()) {
+            //Resetar Pilha
+            pilhaDesfazer.clear();
+            
+            //Resetar Fila
+            fila.clear();
+            contadorValores = 0;
+            indexFilaCircular = 0;
+            
+            //Resetar Deque
+            dequeED.clear();
+            dequeCB.clear();
+            
+            xIni = 141;
+            yIni = 191;
+            xFim = 91;
+            yFim = 91;
+            
+            for (int i = 0; i < contadorBtns.length; i++){
+                contadorBtns[i] = 0;
+            }
+            
+            //Resetar Lista
+            for (int i = 0; i < 16; i++) {
+                if (lista.get(i) != 0) {
+                    lista.set(i, 0);
+                }
+            }
+            posInventario = 0;
+            
+            //Voltar para a tela inicial
             tela = "Inicial";
         }
 
@@ -944,7 +975,10 @@ public class Main extends EngineFrame {
         btnAbrirBau = new GuiButton(x + 285, y - 90, 70, 30, "Abrir");
         btnLinkBau = new GuiLabelButton(x + 370, y - 125, 35, 20, "@Digs");
         checkAnimBau = new GuiCheckBox(x + 235, y - 125, 35, 20, "Animação");
+        checkRmvDinamico = new GuiCheckBox(x - 20, y + 60, 35, 20, "Remoção Sequencial");        
+        
         checkAnimBau.setSelected(true);
+        checkRmvDinamico.setSelected(false);
         
         criarAnimacoes();
 
@@ -954,6 +988,7 @@ public class Main extends EngineFrame {
         componentesLista.add(btnAbrirBau);
         componentesLista.add(btnLinkBau);
         componentesLista.add(checkAnimBau);
+        componentesLista.add(checkRmvDinamico);
 
     }
 
@@ -1069,12 +1104,14 @@ public class Main extends EngineFrame {
 
         if (btnRemover.isMousePressed() && !lista.isEmpty()) {
             lista.set(posInventario, 0);
-
-            for (int i = 0; i < 16; i++) {
-                if (lista.get(i) != 0) {
-                    posInventario = i;
-                    break;
-                }
+            
+            if (checkRmvDinamico.isSelected()){
+                for (int i = 0; i < 16; i++) {
+                    if (lista.get(i) != 0) {
+                        posInventario = i;
+                        break;
+                    }
+                }   
             }
 
         }
