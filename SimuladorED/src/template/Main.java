@@ -8,6 +8,7 @@ import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiCheckBox;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
+import br.com.davidbuzatto.jsge.math.Vector2;
 import br.com.davidbuzatto.jsge.sound.Sound;
 import java.awt.Desktop;
 import java.awt.Paint;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.util.List;
 import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
@@ -93,6 +95,7 @@ public class Main extends EngineFrame {
     private boolean animBau;
     private GuiCheckBox checkAnimBau;
     private GuiCheckBox checkRmvDinamico;
+    private GuiCheckBox checkInsDirect;
     private FrameByFrameAnimation<ImageAnimationFrame> bauAnim;
     private GuiLabelButton btnLinkBau;
     private Sound bruh;
@@ -229,6 +232,10 @@ public class Main extends EngineFrame {
                     for (GuiComponent c : componentesGlobais) {
                         c.draw();
                     }
+                    
+                    //Desenhar o Log                    
+                    desenharLog();
+
                 }
 
                 break;
@@ -279,6 +286,52 @@ public class Main extends EngineFrame {
             tela = "Inicial";
         }
 
+    }
+    
+    public void desenharLog(){
+        
+        String titulo = "Explicação da Estrutura";
+        int x = 0;
+        int y = 0;
+        
+        switch (tela) {
+            case "Pilha":
+                x = 480; y = 190;
+                drawText(titulo, 498, 175, 15, BLACK);
+                drawRectangle(x, y, 240, 140, BLACK);
+                infoEstrutura(x, y, "A Pilha é uma Estrutura   de Dados que organiza da- dos de forma sequencial,  seguindo a regra LIFO, ou seja, o último a entrar é o primeiro a sair.");
+                break;
+            case "Fila":
+                x = 463; y = 255;
+                drawText(titulo, 483, 240, 15, BLACK);
+                drawRectangle(x, y, 245, 195, BLACK);
+                infoEstrutura(x, y, "A Fila é uma Estrutura de Dados que se organiza se- guindo a regra FIFO, ou   seja, o primeiro a entrar é o primeiro a sair. Há   também a Circular que tem como diferença a conexão  do último elemento ao pri-meiro.");
+                break;
+            case "Deque":
+                x = 498; y = 255;
+                drawText(titulo, 523, 240, 15, BLACK);
+                drawRectangle(x, y, 250, 180, BLACK);
+                infoEstrutura(x, y, "O Deque é a abreviação de \"Double Ended Queue\", uma Estrutura de Dados que re-mete à Lista, só que com apossibilidade de inserir eremover elementos tanto aoseu início quanto ao seu  final.");
+                break;
+            case "Lista":
+                x = 18; y = 215;
+                drawText(titulo, 38, 200, 15, BLACK);
+                drawRectangle(x, y, 250, 140, BLACK);
+                infoEstrutura(x, y, "A Lista é uma das Estru-  turas de Dados mais flexí-veis, já que os elementos podem ser inseridos ou re-movidos em qualquer uma   das posições.");
+                break;
+        }
+
+    }
+    
+    public void infoEstrutura(int xIni, int yIni, String msg){
+        int numChar = 26;
+        int espaco = 0;
+        
+        for (int i = 0; i < msg.length(); i += numChar){
+            drawText(msg.substring(i, Math.min(i + numChar, msg.length())), xIni + 10, yIni + 15 + espaco, 15, BLACK);
+            espaco += 20;
+        }
+        
     }
 
     public void drawOutlinedText(String text, int posX, int posY, int fontSize, Paint color, int outlineSize, Paint outlineColor) {
@@ -351,9 +404,9 @@ public class Main extends EngineFrame {
 
         if (btnSimDeque.isMousePressed()) {
             tela = "Deque";
-        }
+        }        if (btnSimLista.isMousePressed()) {
 
-        if (btnSimLista.isMousePressed()) {
+
             animBau = false;
             tela = "Lista";
         }
@@ -976,9 +1029,11 @@ public class Main extends EngineFrame {
         btnLinkBau = new GuiLabelButton(x + 370, y - 125, 35, 20, "@Digs");
         checkAnimBau = new GuiCheckBox(x + 235, y - 125, 35, 20, "Animação");
         checkRmvDinamico = new GuiCheckBox(x - 20, y + 60, 35, 20, "Remoção Sequencial");        
+        checkInsDirect = new GuiCheckBox(x + 235, y - 20, 35, 20, "Inserção Direcionada");        
         
         checkAnimBau.setSelected(true);
         checkRmvDinamico.setSelected(false);
+        checkInsDirect.setSelected(false);
         
         criarAnimacoes();
 
@@ -989,6 +1044,7 @@ public class Main extends EngineFrame {
         componentesLista.add(btnLinkBau);
         componentesLista.add(checkAnimBau);
         componentesLista.add(checkRmvDinamico);
+        componentesLista.add(checkInsDirect);
 
     }
 
@@ -1173,6 +1229,8 @@ public class Main extends EngineFrame {
             
             if (!checkAnimBau.isSelected()){
                 inserirItem(raridade);
+            } else{
+                
             }
 
         }
