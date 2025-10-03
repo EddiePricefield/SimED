@@ -96,6 +96,7 @@ public class Main extends EngineFrame {
     private GuiCheckBox checkAnimBau;
     private GuiCheckBox checkRmvDinamico;
     private GuiCheckBox checkInsDirect;
+    private GuiCheckBox checkVisuSequencial;
     private FrameByFrameAnimation<ImageAnimationFrame> bauAnim;
     private GuiLabelButton btnLinkBau;
     private Sound bruh;
@@ -314,8 +315,8 @@ public class Main extends EngineFrame {
                 infoEstrutura(x, y, "O Deque é a abreviação de \"Double Ended Queue\", uma Estrutura de Dados que re-mete à Lista, só que com apossibilidade de inserir eremover elementos tanto aoseu início quanto ao seu  final.");
                 break;
             case "Lista":
-                x = 18; y = 215;
-                drawText(titulo, 38, 200, 15, BLACK);
+                x = 18; y = 245;
+                drawText(titulo, 38, 230, 15, BLACK);
                 drawRectangle(x, y, 250, 140, BLACK);
                 infoEstrutura(x, y, "A Lista é uma das Estru-  turas de Dados mais flexí-veis, já que os elementos podem ser inseridos ou re-movidos em qualquer uma   das posições.");
                 break;
@@ -1030,10 +1031,12 @@ public class Main extends EngineFrame {
         checkAnimBau = new GuiCheckBox(x + 235, y - 125, 35, 20, "Animação");
         checkRmvDinamico = new GuiCheckBox(x - 20, y + 60, 35, 20, "Remoção Sequencial");        
         checkInsDirect = new GuiCheckBox(x + 235, y - 20, 35, 20, "Inserção Direcionada");        
+        checkVisuSequencial = new GuiCheckBox(x - 310, y - 185, 35, 20, "Visualização Sequencial");        
         
         checkAnimBau.setSelected(true);
         checkRmvDinamico.setSelected(false);
         checkInsDirect.setSelected(false);
+        checkVisuSequencial.setSelected(true);
         
         criarAnimacoes();
 
@@ -1045,6 +1048,7 @@ public class Main extends EngineFrame {
         componentesLista.add(checkAnimBau);
         componentesLista.add(checkRmvDinamico);
         componentesLista.add(checkInsDirect);
+        componentesLista.add(checkVisuSequencial);
 
     }
 
@@ -1302,7 +1306,9 @@ public class Main extends EngineFrame {
                     fillRectangle(x, y, largura, altura, cor);
                 }
                 default -> {
-                    i--;
+                    if (checkVisuSequencial.isSelected()){
+                        i--;
+                    }
                 }
             }
 
@@ -1312,12 +1318,23 @@ public class Main extends EngineFrame {
     }
 
     private void inserirItem(int numero) {
-        for (int i = 0; i < lista.size(); i++) {
-            if (lista.get(i) == 0) {
-                lista.set(i, numero);
-                break;
+        
+        if(!checkInsDirect.isSelected()){
+            
+            for (int i = 0; i < lista.size(); i++) {
+
+                if (!checkInsDirect.isSelected()) {
+                    if (lista.get(i) == 0) {
+                        lista.set(i, numero);
+                        break;
+                    }
+
+                } 
             }
+        }else{
+            lista.set(posInventario, numero);
         }
+        
     }
 
     /*
