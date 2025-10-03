@@ -1072,6 +1072,8 @@ public class Main extends EngineFrame {
         //Inventário - Selecionar item
         drawRectangle(x + tamanho * (posInventario % 4), y + tamanho * (posInventario / 4), tamanho, tamanho, PINK);
         drawRectangle(x - 1 + tamanho * (posInventario % 4), y - 1 + tamanho * (posInventario / 4), tamanho + 2, tamanho + 2, PINK);
+        drawText(Integer.toString(posInventario), x + 234, y + 275, 15, PINK);
+        drawRectangle(x + 230, y + 270, 25, 20, BLACK);
 
         //Inventário - Desenhar os itens
         for (int i = 0; i < lista.size(); i++) {
