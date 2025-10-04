@@ -8,8 +8,8 @@ import br.com.davidbuzatto.jsge.imgui.GuiButton;
 import br.com.davidbuzatto.jsge.imgui.GuiCheckBox;
 import br.com.davidbuzatto.jsge.imgui.GuiComponent;
 import br.com.davidbuzatto.jsge.imgui.GuiLabelButton;
-import br.com.davidbuzatto.jsge.math.Vector2;
 import br.com.davidbuzatto.jsge.sound.Sound;
+import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Paint;
 import java.net.URI;
@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.util.List;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
@@ -37,6 +36,8 @@ public class Main extends EngineFrame {
     private double cronometro;
     private String tela;
     private boolean cronometrar;
+    private Paint corJanelaBau;
+    private Paint corDosContainers;
 
     //Listas de Componentes
     private List<GuiComponent> componentesGlobais;
@@ -123,7 +124,7 @@ public class Main extends EngineFrame {
     public void create() {
 
         //Variáveis Globais
-        tela = "Lista";
+        tela = "Inicial";
         useAsDependencyForIMGUI();
 
         //Componentes Globais
@@ -228,6 +229,18 @@ public class Main extends EngineFrame {
                 break;
 
             case "Desenhar":
+                
+                corJanelaBau = new Color(0xFFC9DE);
+                corDosContainers = WHITE;
+                
+                switch (tela){
+                    case "Inicial" -> clearBackground(new Color(0xFFFFD1));
+                    case "Pilha" -> clearBackground(new Color(0xCED1F8));
+                    case "Fila" -> clearBackground(new Color(0xECD2E0));
+                    case "Deque" -> clearBackground(new Color(0xDBFFD6));
+                    case "Lista" -> clearBackground(new Color(0xFFD7D9));
+                        
+                }
 
                 if (!tela.equals("Inicial") && !componentesGlobais.isEmpty()) {
                     for (GuiComponent c : componentesGlobais) {
@@ -240,6 +253,11 @@ public class Main extends EngineFrame {
                 }
 
                 break;
+
+
+
+
+
 
         }
 
@@ -299,24 +317,28 @@ public class Main extends EngineFrame {
             case "Pilha":
                 x = 480; y = 190;
                 drawText(titulo, 498, 175, 15, BLACK);
+                fillRectangle(x, y, 240, 140, corDosContainers);
                 drawRectangle(x, y, 240, 140, BLACK);
                 infoEstrutura(x, y, "A Pilha é uma Estrutura   de Dados que organiza da- dos de forma sequencial,  seguindo a regra LIFO, ou seja, o último a entrar é o primeiro a sair.");
                 break;
             case "Fila":
                 x = 463; y = 255;
                 drawText(titulo, 483, 240, 15, BLACK);
+                fillRectangle(x, y, 245, 195, corDosContainers);
                 drawRectangle(x, y, 245, 195, BLACK);
                 infoEstrutura(x, y, "A Fila é uma Estrutura de Dados que se organiza se- guindo a regra FIFO, ou   seja, o primeiro a entrar é o primeiro a sair. Há   também a Circular que tem como diferença a conexão  do último elemento ao pri-meiro.");
                 break;
             case "Deque":
                 x = 498; y = 255;
                 drawText(titulo, 523, 240, 15, BLACK);
+                fillRectangle(x, y, 250, 180, corDosContainers);
                 drawRectangle(x, y, 250, 180, BLACK);
-                infoEstrutura(x, y, "O Deque é a abreviação de \"Double Ended Queue\", uma Estrutura de Dados que re-mete à Lista, só que com apossibilidade de inserir eremover elementos tanto aoseu início quanto ao seu  final.");
+                infoEstrutura(x, y, "O Deque é a abreviação de \"Double Ended Queue\", uma Estrutura de Dados que re-mete à Lista, só que com apossibilidade de inserir eremover elementos tanto aoseu início quanto ao seu  fim.");
                 break;
             case "Lista":
                 x = 18; y = 245;
                 drawText(titulo, 38, 230, 15, BLACK);
+                fillRectangle(x, y, 250, 140, corDosContainers);
                 drawRectangle(x, y, 250, 140, BLACK);
                 infoEstrutura(x, y, "A Lista é uma das Estru-  turas de Dados mais flexí-veis, já que os elementos podem ser inseridos ou re-movidos em qualquer uma   das posições.");
                 break;
@@ -336,6 +358,7 @@ public class Main extends EngineFrame {
     }
 
     public void drawOutlinedText(String text, int posX, int posY, int fontSize, Paint color, int outlineSize, Paint outlineColor) {
+        drawText(text, posX - 2, posY + 2, fontSize, GRAY);
         drawText(text, posX - outlineSize, posY - outlineSize, fontSize, outlineColor);
         drawText(text, posX + outlineSize, posY - outlineSize, fontSize, outlineColor);
         drawText(text, posX - outlineSize, posY + outlineSize, fontSize, outlineColor);
@@ -374,7 +397,7 @@ public class Main extends EngineFrame {
     public void desenharTelaInicial() {
 
         //Título
-        drawText("SimED", 170, 80, 150, ORANGE);
+        drawOutlinedText("SimED", 170, 80, 150, ORANGE, 1, BLACK);
 
         //Componentes
         if (tela.equals("Inicial") && !componentesTelaInicial.isEmpty()) {
@@ -461,7 +484,7 @@ public class Main extends EngineFrame {
     public void desenharSimulacaoPilha() {
 
         //Título
-        drawText("Simulação Pilha", 176, 30, 50, BLACK);
+        drawOutlinedText("Simulação Pilha", 176, 30, 50, new Color(0x9092ad), 1, BLACK);
 
         //Desenhar o GRID e as Formas
         int x = 150;
@@ -473,6 +496,7 @@ public class Main extends EngineFrame {
 
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
+                fillRectangle(x + tamanho * j, y + tamanho * i, tamanho, tamanho, corDosContainers);
                 drawRectangle(x + tamanho * j, y + tamanho * i, tamanho, tamanho, BLACK);
             }
         }
@@ -481,6 +505,7 @@ public class Main extends EngineFrame {
 
         //Desenhar o Visual dos Stacks
         drawText("Exibição Horizontal da Pilha", 475, 100, 15, BLACK);
+        fillRectangle(450, 115, 295, 35, corDosContainers);
         drawRectangle(450, 115, 295, 35, BLACK);
 
 //        drawText("Pilha: Refazer", 535, 175, 15, RED);
@@ -646,10 +671,11 @@ public class Main extends EngineFrame {
     public void desenharSimulacaoFila() {
 
         //Título
-        drawText("Simulação Fila", 176, 30, 50, BLACK);
+        drawOutlinedText("Simulação Fila", 176, 30, 50, new Color(0xa5939c), 1, BLACK);
 
         //Desenhando Fila
         for (int i = 1; i < 14; i++) {
+            fillRectangle(53 * i, 100, 50, 50, corDosContainers);
             drawRectangle(53 * i, 100, 50, 50, BLACK);
         }
 
@@ -661,6 +687,7 @@ public class Main extends EngineFrame {
         for (int i = 0; i < 13; i++) {
             double x = centroX + raio * Math.cos(Math.toRadians(i * 360/13));
             double y = centroY + raio * Math.sin(Math.toRadians(i * 360/13));
+            fillRectangle(x, y, 30, 30, corDosContainers);
             drawRectangle(x, y, 30, 30, BLACK);
         }
         
@@ -678,6 +705,7 @@ public class Main extends EngineFrame {
 
         //Desenhar o Visual da Fila
         drawText("Exibição Horizontal da Fila", x + 370, y - 40, 15, BLACK);
+        fillRectangle(x + 388, y - 20, 200, 35, corDosContainers);
         drawRectangle(x + 388, y - 20, 200, 35, BLACK);
 
         desenharFila();
@@ -842,9 +870,10 @@ public class Main extends EngineFrame {
     public void desenharSimulacaoDeque() {
 
         //Título
-        drawText("Simulação Deque", 176, 30, 50, BLACK);
+        drawOutlinedText("Simulação Deque", 176, 30, 50, new Color(0x99b295), 1, BLACK);
 
         //Desenhar Grid e Quadrado
+        fillRectangle(50, 100, 273, 273, corDosContainers);
         drawRectangle(50, 100, 273, 273, BLACK);
 
         drawRectangle(141, 191, 91, 91, GRAY);
@@ -856,7 +885,9 @@ public class Main extends EngineFrame {
 
         //Desenhar o Visual dos Deques
         drawText("Exibição Horizontal dos Deques", x + 140, y - 30, 15, BLACK);
+        fillRectangle(x + 125, y - 10, 295, 35, corDosContainers);
         drawRectangle(x + 125, y - 10, 295, 35, BLACK);
+        fillRectangle(x + 125, y + 40, 295, 35, corDosContainers);
         drawRectangle(x + 125, y + 40, 295, 35, BLACK);
 
         desenharDeque();
@@ -1055,7 +1086,7 @@ public class Main extends EngineFrame {
     public void desenharSimulacaoLista() {
 
         //Título
-        drawText("Simulação Lista", 176, 30, 50, BLACK);
+        drawOutlinedText("Simulação Lista", 176, 30, 50, new Color(0xb29697), 1, BLACK);
 
         //Desenhar Janelas Principais
         int x = 285;
@@ -1065,6 +1096,7 @@ public class Main extends EngineFrame {
         //Inventário - GRID
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
+                fillRectangle(x + tamanho * j, y + tamanho * i, tamanho, tamanho, corDosContainers);
                 drawRectangle(x + tamanho * j, y + tamanho * i, tamanho, tamanho, BLACK);
             }
         }
@@ -1072,8 +1104,9 @@ public class Main extends EngineFrame {
         //Inventário - Selecionar item
         drawRectangle(x + tamanho * (posInventario % 4), y + tamanho * (posInventario / 4), tamanho, tamanho, PINK);
         drawRectangle(x - 1 + tamanho * (posInventario % 4), y - 1 + tamanho * (posInventario / 4), tamanho + 2, tamanho + 2, PINK);
-        drawText(Integer.toString(posInventario), x + 234, y + 275, 15, PINK);
+        fillRectangle(x + 230, y + 270, 25, 20, corDosContainers);
         drawRectangle(x + 230, y + 270, 25, 20, BLACK);
+        drawText(Integer.toString(posInventario), x + 234, y + 275, 15, PINK);
 
         //Inventário - Desenhar os itens
         for (int i = 0; i < lista.size(); i++) {
@@ -1107,6 +1140,7 @@ public class Main extends EngineFrame {
         }
 
         //Baú
+        fillRectangle(x + 290, y + 20, 200, 200, corJanelaBau);
         drawRectangle(x + 290, y + 20, 200, 200, BLACK);
         drawRectangle(x + 300, y + 30, 180, 140, BLACK);
 
@@ -1114,6 +1148,7 @@ public class Main extends EngineFrame {
 
         //Desenhar o Visual da Lista
         drawText("Exibição Horizontal da Lista", x - 270, y + 20, 15, BLACK);
+        fillRectangle(x - 265, y + 40, 240, 35, corDosContainers);
         drawRectangle(x - 265, y + 40, 240, 35, BLACK);
 
         desenharLista();
