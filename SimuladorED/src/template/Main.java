@@ -34,10 +34,13 @@ public class Main extends EngineFrame {
 
     //Variáveis Globais
     private double cronometro;
-    private String tela;
+    private Tela tela;
     private boolean cronometrar;
     private Paint corJanelaBau;
     private Paint corDosContainers;
+    private final int INICIAR = 1;
+    private final int DESENHAR = 2;
+    private final int ATUALIZAR = 3;
 
     //Listas de Componentes
     private List<GuiComponent> componentesGlobais;
@@ -49,6 +52,9 @@ public class Main extends EngineFrame {
 
     //Componentes - Globais
     private GuiButton btnVoltar;
+    
+    //Enumeradores de Tela
+    private enum Tela{ INICIAL, PILHA, FILA, DEQUE, LISTA };
 
     //Componentes - Tela Inicial
     private GuiButton btnSimPilha;
@@ -124,11 +130,11 @@ public class Main extends EngineFrame {
     public void create() {
 
         //Variáveis Globais
-        tela = "Inicial";
+        tela = Tela.INICIAL;
         useAsDependencyForIMGUI();
 
         //Componentes Globais
-        componentesGlobais("Iniciar");
+        componentesGlobais(INICIAR);
 
         //Inicializar Telas (queria criar apenas com o switch, mas não pode, precisamos criar todas as telas no inicio do programa)
         criarTelaInicial();
@@ -170,19 +176,19 @@ public class Main extends EngineFrame {
         }
 
         //Atualização - Globais
-        componentesGlobais("Atualizar", delta);
+        componentesGlobais(ATUALIZAR, delta);
 
         //Atualização -  Telas
         switch (tela) {
-            case "Inicial" ->
+            case INICIAL ->
                 atualizarTelaInicial(delta);
-            case "Pilha" ->
+            case PILHA ->
                 atualizarSimulacaoPilha(delta);
-            case "Fila" ->
+            case FILA ->
                 atualizarSimulacaoFila(delta);
-            case "Deque" ->
+            case DEQUE ->
                 atualizarSimulacaoDeque(delta);
-            case "Lista" ->
+            case LISTA ->
                 atualizarSimulacaoLista(delta);
         }
 
@@ -193,19 +199,19 @@ public class Main extends EngineFrame {
     public void draw() {
 
         //Desenhar - Globais
-        componentesGlobais("Desenhar");
+        componentesGlobais(DESENHAR);
 
         //Desenhar - Telas
         switch (tela) {
-            case "Inicial" ->
+            case INICIAL ->
                 desenharTelaInicial();
-            case "Pilha" ->
+            case PILHA ->
                 desenharSimulacaoPilha();
-            case "Fila" ->
+            case FILA ->
                 desenharSimulacaoFila();
-            case "Deque" ->
+            case DEQUE ->
                 desenharSimulacaoDeque();
-            case "Lista" ->
+            case LISTA ->
                 desenharSimulacaoLista();
         }
 
@@ -215,10 +221,10 @@ public class Main extends EngineFrame {
     /*
     *     COMPONENTES GLOBAIS
      */
-    public void componentesGlobais(String opcao) {
+    public void componentesGlobais(int opcao) {
 
         switch (opcao) {
-            case "Iniciar":
+            case INICIAR:
 
                 componentesGlobais = new ArrayList<>();
 
@@ -228,21 +234,21 @@ public class Main extends EngineFrame {
 
                 break;
 
-            case "Desenhar":
+            case DESENHAR:
                 
                 corJanelaBau = new Color(0xFFC9DE);
                 corDosContainers = WHITE;
                 
                 switch (tela){
-                    case "Inicial" -> clearBackground(new Color(0xFFFFD1));
-                    case "Pilha" -> clearBackground(new Color(0xCED1F8));
-                    case "Fila" -> clearBackground(new Color(0xECD2E0));
-                    case "Deque" -> clearBackground(new Color(0xDBFFD6));
-                    case "Lista" -> clearBackground(new Color(0xFFD7D9));
+                    case INICIAL -> clearBackground(new Color(0xFFFFD1));
+                    case PILHA -> clearBackground(new Color(0xCED1F8));
+                    case FILA -> clearBackground(new Color(0xECD2E0));
+                    case DEQUE -> clearBackground(new Color(0xDBFFD6));
+                    case LISTA -> clearBackground(new Color(0xFFD7D9));
                         
                 }
 
-                if (!tela.equals("Inicial") && !componentesGlobais.isEmpty()) {
+                if (!tela.equals(tela.INICIAL) && !componentesGlobais.isEmpty()) {
                     for (GuiComponent c : componentesGlobais) {
                         c.draw();
                     }
@@ -263,9 +269,9 @@ public class Main extends EngineFrame {
 
     }
 
-    public void componentesGlobais(String opcao, double delta) {
+    public void componentesGlobais(int opcao, double delta) {
 
-        if (opcao.equals("Atualizar") && !tela.equals("Inicial") && !componentesGlobais.isEmpty()) {
+        if (opcao == ATUALIZAR && !tela.equals(tela.INICIAL) && !componentesGlobais.isEmpty()) {
             for (GuiComponent c : componentesGlobais) {
                 c.update(delta);
             }
@@ -302,7 +308,7 @@ public class Main extends EngineFrame {
             posInventario = 0;
             
             //Voltar para a tela inicial
-            tela = "Inicial";
+            tela = tela.INICIAL;
         }
 
     }
@@ -314,28 +320,28 @@ public class Main extends EngineFrame {
         int y = 0;
         
         switch (tela) {
-            case "Pilha":
+            case PILHA:
                 x = 480; y = 190;
                 drawText(titulo, 498, 175, 15, BLACK);
                 fillRectangle(x, y, 240, 140, corDosContainers);
                 drawRectangle(x, y, 240, 140, BLACK);
                 infoEstrutura(x, y, "A Pilha é uma Estrutura   de Dados que organiza da- dos de forma sequencial,  seguindo a regra LIFO, ou seja, o último a entrar é o primeiro a sair.");
                 break;
-            case "Fila":
+            case FILA:
                 x = 463; y = 255;
                 drawText(titulo, 483, 240, 15, BLACK);
                 fillRectangle(x, y, 245, 195, corDosContainers);
                 drawRectangle(x, y, 245, 195, BLACK);
                 infoEstrutura(x, y, "A Fila é uma Estrutura de Dados que se organiza se- guindo a regra FIFO, ou   seja, o primeiro a entrar é o primeiro a sair. Há   também a Circular que tem como diferença a conexão  do último elemento ao pri-meiro.");
                 break;
-            case "Deque":
+            case DEQUE:
                 x = 498; y = 255;
                 drawText(titulo, 523, 240, 15, BLACK);
                 fillRectangle(x, y, 250, 180, corDosContainers);
                 drawRectangle(x, y, 250, 180, BLACK);
                 infoEstrutura(x, y, "O Deque é a abreviação de \"Double Ended Queue\", uma Estrutura de Dados que re-mete à Lista, só que com apossibilidade de inserir eremover elementos tanto aoseu início quanto ao seu  fim.");
                 break;
-            case "Lista":
+            case LISTA:
                 x = 18; y = 245;
                 drawText(titulo, 38, 230, 15, BLACK);
                 fillRectangle(x, y, 250, 140, corDosContainers);
@@ -400,7 +406,7 @@ public class Main extends EngineFrame {
         drawOutlinedText("SimED", 170, 80, 150, ORANGE, 1, BLACK);
 
         //Componentes
-        if (tela.equals("Inicial") && !componentesTelaInicial.isEmpty()) {
+        if (tela.equals(tela.INICIAL) && !componentesTelaInicial.isEmpty()) {
             for (GuiComponent c : componentesTelaInicial) {
                 c.draw();
             }
@@ -411,7 +417,7 @@ public class Main extends EngineFrame {
     public void atualizarTelaInicial(double delta) {
 
         //Atualizando os Componentes
-        if (tela.equals("Inicial") && !componentesTelaInicial.isEmpty()) {
+        if (tela.equals(tela.INICIAL) && !componentesTelaInicial.isEmpty()) {
             for (GuiComponent c : componentesTelaInicial) {
                 c.update(delta);
             }
@@ -419,20 +425,20 @@ public class Main extends EngineFrame {
 
         //Ações - Clique do Mouse
         if (btnSimPilha.isMousePressed()) {
-            tela = "Pilha";
+            tela = tela.PILHA;
         }
 
         if (btnSimFila.isMousePressed()) {
-            tela = "Fila";
+            tela = tela.FILA;
         }
 
         if (btnSimDeque.isMousePressed()) {
-            tela = "Deque";
+            tela = tela.DEQUE;
         }        if (btnSimLista.isMousePressed()) {
 
 
             animBau = false;
-            tela = "Lista";
+            tela = tela.LISTA;
         }
 
         if (btnLink.isMousePressed()) {
@@ -514,7 +520,7 @@ public class Main extends EngineFrame {
 
         //Desenhar Painel de Informações
         //Componentes
-        if (tela.equals("Pilha") && !componentesPilha.isEmpty()) {
+        if (tela.equals(tela.PILHA) && !componentesPilha.isEmpty()) {
             for (GuiComponent c : componentesPilha) {
                 c.draw();
             }
@@ -525,7 +531,7 @@ public class Main extends EngineFrame {
     public void atualizarSimulacaoPilha(double delta) {
 
         //Componentes
-        if (tela.equals("Pilha") && !componentesPilha.isEmpty()) {
+        if (tela.equals(tela.PILHA) && !componentesPilha.isEmpty()) {
             for (GuiComponent c : componentesPilha) {
                 c.update(delta);
             }
@@ -711,7 +717,7 @@ public class Main extends EngineFrame {
         desenharFila();
 
         //Componentes
-        if (tela.equals("Fila") && !componentesFila.isEmpty()) {
+        if (tela.equals(tela.FILA) && !componentesFila.isEmpty()) {
             for (GuiComponent c : componentesFila) {
                 c.draw();
             }
@@ -722,7 +728,7 @@ public class Main extends EngineFrame {
     public void atualizarSimulacaoFila(double delta) {
 
         //Componentes
-        if (tela.equals("Fila") && !componentesFila.isEmpty()) {
+        if (tela.equals(tela.FILA) && !componentesFila.isEmpty()) {
             for (GuiComponent c : componentesFila) {
                 c.update(delta);
             }
@@ -897,7 +903,7 @@ public class Main extends EngineFrame {
         drawText("DESEMPILHAR", x - 14, y + 100, 15, BLACK);
 
         //Componentes
-        if (tela.equals("Deque") && !componentesDeque.isEmpty()) {
+        if (tela.equals(tela.DEQUE) && !componentesDeque.isEmpty()) {
             for (GuiComponent c : componentesDeque) {
                 c.draw();
             }
@@ -908,7 +914,7 @@ public class Main extends EngineFrame {
     public void atualizarSimulacaoDeque(double delta) {
 
         //Componentes
-        if (tela.equals("Deque") && !componentesDeque.isEmpty()) {
+        if (tela.equals(tela.DEQUE) && !componentesDeque.isEmpty()) {
             for (GuiComponent c : componentesDeque) {
                 c.update(delta);
             }
@@ -1158,7 +1164,7 @@ public class Main extends EngineFrame {
         drawText("DESEMPILHAR", x + 80, y + 310, 15, BLACK);
 
         //Componentes
-        if (tela.equals("Lista") && !componentesLista.isEmpty()) {
+        if (tela.equals(tela.LISTA) && !componentesLista.isEmpty()) {
             for (GuiComponent c : componentesLista) {
                 c.draw();
             }
@@ -1169,7 +1175,7 @@ public class Main extends EngineFrame {
     public void atualizarSimulacaoLista(double delta) {
 
         //Componentes
-        if (tela.equals("Lista") && !componentesLista.isEmpty()) {
+        if (tela.equals(tela.LISTA) && !componentesLista.isEmpty()) {
             for (GuiComponent c : componentesLista) {
                 c.update(delta);
             }
